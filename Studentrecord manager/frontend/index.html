@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Record Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <img src="assets/logo.png" alt="SRM Logo">
+        </div>
+
+        <button class="nav active" data-page="dashboard">🏠 Dashboard</button>
+        <button class="nav" data-page="add">➕ Add Student</button>
+        <button class="nav" data-page="marks">📝 Marks Record</button>
+        <button class="nav" data-page="view">📋 View Students</button>
+        <button class="nav" data-page="search">🔍 Search</button>
+        <button class="nav" data-page="update">✏️ Update</button>
+        <button class="nav" data-page="delete">🗑️ Delete</button>
+
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <h1>Student Record Manager</h1>
+            <button class="logout">Logout</button>
+        </div>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="page activePage">
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Total Students</h3>
+                    <h2 id="totalStudents">0</h2>
+                </div>
+
+                <div class="card" id="branchCard">
+                    <h3>Branches</h3>
+                    <h2 id="totalBranches">0</h2>
+                </div>
+
+                <div class="card">
+                    <h3>Today's Entries</h3>
+                    <h2 id="todayEntries">0</h2>
+                </div>
+
+            </div>
+
+            <div class="dashboard-grid">
+
+                <div class="panel quick-panel">
+
+                    <h2>⚡ Quick Actions</h2>
+
+                    <div class="quick-buttons">
+
+                        <button class="quick-btn"
+                        onclick="openPage('add',document.querySelector('[data-page=add]'))">
+
+                            ➕ Add Student
+
+                        </button>
+
+                        <button class="quick-btn"
+                        onclick="openPage('marks',document.querySelector('[data-page=marks]'))">
+
+                            📝 Marks Entry
+
+                        </button>
+
+                        <button class="quick-btn"
+                        onclick="openPage('view',document.querySelector('[data-page=view]'))">
+
+                            📋 View Students
+
+                        </button>
+
+                        <button class="quick-btn"
+                        onclick="openPage('search',document.querySelector('[data-page=search]'))">
+
+                            🔍 Search Student
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="panel recent-panel">
+
+                    <h2>👨‍🎓 Recent Students</h2>
+
+                    <div id="recentStudents"></div>
+
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <h2>🏫 Branch Distribution</h2>
+
+                <div id="branchStats" class="branch-stats"></div>
+
+            </div>
+
+        </section>
+
+        <!-- Branch Filter -->
+        <section id="branchPanel" class="page">
+
+            <div class="panel">
+
+                <h2>Select Branch</h2>
+
+                <div id="branchButtons" class="branch-grid"></div>
+
+            </div>
+
+        </section>
+
+        <!-- Add Student -->
+        <section id="add" class="page">
+
+            <div class="panel">
+
+                <h2>Add Student</h2>
+
+                <form id="studentForm">
+
+                    <div class="grid">
+
+                        <input id="roll" placeholder="Roll Number" required>
+
+                        <input id="name" placeholder="Student Name" required>
+
+                        <input id="age" type="number" placeholder="Age" required>
+
+                        <select id="gender" required>
+
+                            <option value="">Select Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+
+                        </select>
+
+                        <input id="branch" placeholder="Branch" required>
+
+                        <input id="contact" placeholder="Contact Number" required>
+
+                    </div>
+
+                    <button class="primary" type="submit">
+
+                        Save Student
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+        <!-- Marks Record -->
+        <section id="marks" class="page">
+
+            <div class="panel">
+
+                <h2>Student Marks Entry</h2>
+
+                <div class="grid">
+
+                    <input id="marksRoll"
+                    placeholder="Enter Roll Number"
+                    onkeyup="loadStudentForMarks()">
+
+                    <input id="marksName"
+                    placeholder="Name"
+                    readonly>
+
+                    <input id="marksGender"
+                    placeholder="Gender"
+                    readonly>
+
+                    <input id="marksBranch"
+                    placeholder="Branch"
+                    readonly>
+
+                </div>
+
+                <h3 style="margin:20px 0 10px;">Subject Marks</h3>
+
+                <div class="grid">
+
+                    <input id="m1" type="number" placeholder="Mathematics" min="0" max="100">
+
+                    <input id="m2" type="number" placeholder="Physics" min="0" max="100">
+
+                    <input id="m3" type="number" placeholder="Chemistry" min="0" max="100">
+
+                    <input id="m4" type="number" placeholder="Programming" min="0" max="100">
+
+                    <input id="m5" type="number" placeholder="English" min="0" max="100">
+
+                </div>
+
+                <button class="primary" onclick="saveMarks()">
+
+                    Save Marks
+
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- View Students -->
+        <section id="view" class="page">
+
+            <div class="panel">
+
+                <h2>Student Records</h2>
+
+                <input id="searchInput"
+                placeholder="Search students..."
+                style="margin-bottom:20px;">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Roll</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Branch</th>
+                            <th>Total</th>
+                            <th>%</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="tableBody"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+        <!-- Search -->
+        <section id="search" class="page">
+
+            <div class="panel">
+
+                <h2>Search Student</h2>
+
+                <input id="searchBox"
+                placeholder="Enter Roll Number or Name">
+
+                <br><br>
+
+                <button class="primary"
+                onclick="searchStudent()">
+
+                    Search
+
+                </button>
+
+                <br><br>
+
+                <div id="searchResult"></div>
+
+            </div>
+
+        </section>
+
+        <!-- Update -->
+        <section id="update" class="page">
+
+            <div class="panel">
+
+                <h2>Update Student</h2>
+
+                <input id="updateRoll"
+                placeholder="Enter Roll Number">
+
+                <br><br>
+
+                <button class="primary"
+                onclick="loadStudentForUpdate()">
+
+                    Load Student
+
+                </button>
+
+                <br><br>
+
+                <div id="updateArea"></div>
+
+            </div>
+
+        </section>
+
+        <!-- Delete -->
+        <section id="delete" class="page">
+
+            <div class="panel">
+
+                <h2>Delete Student</h2>
+
+                <input id="deleteRoll"
+                placeholder="Enter Roll Number">
+
+                <br><br>
+
+                <button class="danger"
+                onclick="deleteByRoll()">
+
+                    Delete Student
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
