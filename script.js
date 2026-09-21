@@ -1,575 +1,397 @@
-// =========================================
-// STUDENT RECORD MANAGER
-// =========================================
+// ===================== SAMPLE STUDENTS =====================
+const sampleStudents = [
+{roll:"101",name:"K. Anuhya Keerthi",age:18,gender:"Female",branch:"CSE",contact:"9876543201"},
+{roll:"102",name:"K. Parimala",age:19,gender:"Female",branch:"CSE-DS",contact:"9876543202"},
+{roll:"103",name:"A. Sai Teja",age:18,gender:"Male",branch:"CSE",contact:"9876543203"},
+{roll:"104",name:"B. Harshitha",age:19,gender:"Female",branch:"ECE",contact:"9876543204"},
+{roll:"105",name:"C. Rahul",age:18,gender:"Male",branch:"AI",contact:"9876543205"},
+{roll:"106",name:"D. Nandini",age:18,gender:"Female",branch:"CSE",contact:"9876543206"},
+{roll:"107",name:"E. Karthik",age:19,gender:"Male",branch:"IT",contact:"9876543207"},
+{roll:"108",name:"F. Meghana",age:18,gender:"Female",branch:"ECE",contact:"9876543208"},
+{roll:"109",name:"G. Vivek",age:19,gender:"Male",branch:"CSE-DS",contact:"9876543209"},
+{roll:"110",name:"H. Sravani",age:18,gender:"Female",branch:"CSE",contact:"9876543210"},
+{roll:"111",name:"I. Kiran",age:19,gender:"Male",branch:"CSE-AI",contact:"9876543211"},
+{roll:"112",name:"J. Divya",age:18,gender:"Female",branch:"AI",contact:"9876543212"},
+{roll:"113",name:"K. Praneeth",age:21,gender:"Male",branch:"IT",contact:"9876543213"},
+{roll:"114",name:"L. Meghana",age:18,gender:"Female",branch:"CSE-DS",contact:"9876543214"},
+{roll:"115",name:"M. Harsha",age:19,gender:"Male",branch:"ECE",contact:"9876543215"},
+{roll:"116",name:"N. Lakshmi",age:18,gender:"Female",branch:"CSE",contact:"9876543216"},
+{roll:"117",name:"O. Sandeep",age:20,gender:"Male",branch:"AI",contact:"9876543217"},
+{roll:"118",name:"P. Bhavya",age:18,gender:"Female",branch:"IT",contact:"9876543218"},
+{roll:"119",name:"Q. Naveen",age:19,gender:"Male",branch:"CSE",contact:"9876543219"},
+{roll:"120",name:"R. Keerthana",age:18,gender:"Female",branch:"ECE",contact:"9876543220"},
+{roll:"121",name:"S. Akhil",age:19,gender:"Male",branch:"CSE-DS",contact:"9876543221"},
+{roll:"122",name:"T. Sneha",age:18,gender:"Female",branch:"AI",contact:"9876543222"},
+{roll:"123",name:"U. Charan",age:20,gender:"Male",branch:"IT",contact:"9876543223"},
+{roll:"124",name:"V. Sindhu",age:18,gender:"Female",branch:"CSE",contact:"9876543224"},
+{roll:"125",name:"W. Arun",age:19,gender:"Male",branch:"ECE",contact:"9876543225"}
+];
 
-// ---------- Navigation ----------
-
-const pages = document.querySelectorAll(".page");
-const navButtons = document.querySelectorAll(".nav");
-
-function openPage(pageName, btn = null) {
-    pages.forEach(page => page.classList.remove("activePage"));
-
-    const page = document.getElementById(pageName);
-
-    if (page)
-        page.classList.add("activePage");
-
-    navButtons.forEach(b => b.classList.remove("active"));
-
-    if (btn)
-        btn.classList.add("active");
+// Load once
+let students = JSON.parse(localStorage.getItem("students"));
+if (!students) {
+    students = sampleStudents;
+    localStorage.setItem("students", JSON.stringify(students));
 }
 
-navButtons.forEach(btn => {
-    btn.onclick = () => {
-        openPage(btn.dataset.page, btn);
-    };
+// ===================== NAVIGATION =====================
+const pages = document.querySelectorAll(".page");
+const navs = document.querySelectorAll(".nav");
+
+function openPage(pageName, btn = null) {
+    pages.forEach(p => p.classList.remove("activePage"));
+    document.getElementById(pageName)?.classList.add("activePage");
+
+    navs.forEach(n => n.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+}
+
+navs.forEach(btn => {
+    btn.onclick = () => openPage(btn.dataset.page, btn);
 });
 
-// ---------- Data ----------
-
-let students = JSON.parse(localStorage.getItem("students")) || [];
-
-// ---------- Add Student ----------
-
+// ===================== ADD STUDENT =====================
 const form = document.getElementById("studentForm");
 
 if (form) {
+form.onsubmit = function(e){
+e.preventDefault();
 
-    form.addEventListener("submit", function (e) {
+const roll = document.getElementById("roll").value.trim();
 
-        e.preventDefault();
+if(students.some(s=>s.roll===roll)){
+alert("Roll Number already exists!");
+return;
+}
 
-        const roll = document.getElementById("roll").value.trim();
+students.push({
+roll,
+name:document.getElementById("name").value.trim(),
+age:document.getElementById("age").value.trim(),
+gender:document.getElementById("gender").value,
+branch:document.getElementById("branch").value.trim(),
+contact:document.getElementById("contact").value.trim()
+});
 
-        if (students.some(s => s.roll === roll)) {
-            alert("Roll Number already exists!");
-            return;
-        }
+localStorage.setItem("students",JSON.stringify(students));
+form.reset();
+loadTable();
+loadBranches();
+alert("Student Added Successfully!");
+openPage("view",document.querySelector('[data-page="view"]'));
+}
+}
 
-        students.push({
-            roll: roll,
-            name: document.getElementById("name").value.trim(),
-            age: document.getElementById("age").value.trim(),
-            gender: document.getElementById("gender").value,
-            branch: document.getElementById("branch").value.trim(),
-            contact: document.getElementById("contact").value.trim(),
-            marks: [],
-            total: null,
-            percentage: null,
-            grade: null
-        });
+// ===================== GRADE =====================
+function grade(p){
+if(p>=90) return "A+";
+if(p>=80) return "A";
+if(p>=70) return "B";
+if(p>=60) return "C";
+if(p>=50) return "D";
+return "F";
+}
 
-        localStorage.setItem("students", JSON.stringify(students));
+// ===================== MARKS =====================
+function loadStudentForMarks(){
 
-        form.reset();
+const roll=document.getElementById("marksRoll")?.value.trim();
+const s=students.find(x=>x.roll===roll);
 
-        loadTable();
+if(!s){
+marksName.value="";
+marksGender.value="";
+marksBranch.value="";
+return;
+}
 
-        loadBranches();
-
-        alert("Student Added Successfully!");
-
-        openPage("view", document.querySelector('[data-page="view"]'));
-
-    });
+marksName.value=s.name;
+marksGender.value=s.gender;
+marksBranch.value=s.branch;
 
 }
 
-// ---------- Grade ----------
+function saveMarks(){
 
-function calculateGrade(per) {
+const roll=marksRoll.value.trim();
+const s=students.find(x=>x.roll===roll);
 
-    if (per >= 90) return "A+";
-    if (per >= 80) return "A";
-    if (per >= 70) return "B";
-    if (per >= 60) return "C";
-    if (per >= 50) return "D";
+if(!s){
+alert("Student Not Found!");
+return;
+}
 
-    return "F";
+const marks=[
+Number(m1.value||0),
+Number(m2.value||0),
+Number(m3.value||0),
+Number(m4.value||0),
+Number(m5.value||0)
+];
+
+const total=marks.reduce((a,b)=>a+b,0);
+const per=(total/5).toFixed(1);
+
+s.total=total;
+s.percentage=per;
+s.grade=grade(Number(per));
+
+localStorage.setItem("students",JSON.stringify(students));
+loadTable();
+
+alert("Marks Saved!");
+
+marksRoll.value="";
+marksName.value="";
+marksGender.value="";
+marksBranch.value="";
+m1.value="";
+m2.value="";
+m3.value="";
+m4.value="";
+m5.value="";
 
 }
 
-// ---------- Marks Auto Fill ----------
+// ===================== TABLE =====================
+function loadTable(list=students){
 
-function loadStudentForMarks() {
+const body=document.getElementById("tableBody");
+if(!body) return;
 
-    const roll = document.getElementById("marksRoll").value.trim();
+body.innerHTML="";
 
-    const student = students.find(s => s.roll === roll);
+list.forEach(stu=>{
 
-    if (student) {
+const i=students.indexOf(stu);
 
-        document.getElementById("marksName").value = student.name;
-        document.getElementById("marksGender").value = student.gender;
-        document.getElementById("marksBranch").value = student.branch;
+body.innerHTML+=`
+<tr>
+<td>${stu.roll}</td>
+<td>${stu.name}</td>
+<td>${stu.age}</td>
+<td>${stu.gender}</td>
+<td>${stu.branch}</td>
+<td>${stu.total??"-"}</td>
+<td>${stu.percentage?stu.percentage+"%":"-"}</td>
+<td>${stu.grade??"-"}</td>
+<td>
+<button class="action edit" onclick="editStudent(${i})">✏️</button>
+<button class="action deleteBtn" onclick="removeStudent(${i})">🗑️</button>
+</td>
+</tr>`;
+});
 
-    } else {
-
-        document.getElementById("marksName").value = "";
-        document.getElementById("marksGender").value = "";
-        document.getElementById("marksBranch").value = "";
-
-    }
-
-}
-
-// ---------- Save Marks ----------
-
-function saveMarks() {
-
-    const roll = document.getElementById("marksRoll").value.trim();
-
-    const student = students.find(s => s.roll === roll);
-
-    if (!student) {
-
-        alert("Student Not Found!");
-        return;
-
-    }
-
-    const marks = [
-        Number(document.getElementById("m1").value),
-        Number(document.getElementById("m2").value),
-        Number(document.getElementById("m3").value),
-        Number(document.getElementById("m4").value),
-        Number(document.getElementById("m5").value)
-    ];
-
-    const total = marks.reduce((a, b) => a + b, 0);
-
-    const percentage = (total / 5).toFixed(1);
-
-    student.marks = marks;
-    student.total = total;
-    student.percentage = percentage;
-    student.grade = calculateGrade(Number(percentage));
-
-    localStorage.setItem("students", JSON.stringify(students));
-
-    alert("Marks Saved Successfully!");
-
-    document.getElementById("marksRoll").value = "";
-    document.getElementById("marksName").value = "";
-    document.getElementById("marksGender").value = "";
-    document.getElementById("marksBranch").value = "";
-
-    ["m1", "m2", "m3", "m4", "m5"].forEach(id => {
-        document.getElementById(id).value = "";
-    });
-
-    loadTable();
+updateCards();
 
 }
 
-// ---------- Load Table ----------
+// ===================== DASHBOARD =====================
+function updateCards(){
 
-function loadTable(list = students) {
+document.getElementById("totalStudents").textContent=students.length;
+document.getElementById("todayEntries").textContent=students.length;
 
-    const body = document.getElementById("tableBody");
+const branches=[...new Set(students.map(s=>s.branch))];
+document.getElementById("totalBranches").textContent=branches.length;
 
-    if (!body) return;
+const recent=document.getElementById("recentStudents");
+if(recent){
+recent.innerHTML="";
+students.slice(-5).reverse().forEach(s=>{
+recent.innerHTML+=`
+<div class="recent-item">
+<div><b>${s.name}</b><br><small>${s.branch}</small></div>
+<div>#${s.roll}</div>
+</div>`;
+});
+}
 
-    body.innerHTML = "";
-
-    list.forEach(student => {
-
-        const realIndex = students.indexOf(student);
-
-        body.innerHTML += `
-        <tr>
-
-            <td>${student.roll}</td>
-            <td>${student.name}</td>
-            <td>${student.age}</td>
-            <td>${student.gender}</td>
-            <td>${student.branch}</td>
-            <td>${student.total ?? "-"}</td>
-            <td>${student.percentage ?? "-"}${student.percentage ? "%" : ""}</td>
-            <td>${student.grade ?? "-"}</td>
-
-            <td>
-
-                <button class="action edit"
-                onclick="editStudent(${realIndex})">
-
-                ✏️
-
-                </button>
-
-                <button class="action deleteBtn"
-                onclick="removeStudent(${realIndex})">
-
-                🗑️
-
-                </button>
-
-            </td>
-
-        </tr>
-        `;
-
-    });
-
-    updateCards();
+const stats=document.getElementById("branchStats");
+if(stats){
+stats.innerHTML="";
+branches.forEach(b=>{
+stats.innerHTML+=`
+<div class="branch-box">
+<div>${b}</div>
+<h3>${students.filter(x=>x.branch===b).length}</h3>
+</div>`;
+});
+}
 
 }
 
-// ---------- Dashboard ----------
+// ===================== BRANCH FILTER =====================
+function loadBranches(){
 
-function updateCards() {
+const box=document.getElementById("branchButtons");
+if(!box) return;
 
-    const total = document.getElementById("totalStudents");
-    const branch = document.getElementById("totalBranches");
-    const today = document.getElementById("todayEntries");
+box.innerHTML=`<button class="branchBtn" onclick="showAllStudents()">All Students</button>`;
 
-    if (total)
-        total.textContent = students.length;
-
-    const branches = [...new Set(students.map(s => s.branch))];
-
-    if (branch)
-        branch.textContent = branches.length;
-
-    if (today)
-        today.textContent = students.length;
-
-    const recent = document.getElementById("recentStudents");
-
-    if (recent) {
-
-        recent.innerHTML = "";
-
-        students.slice(-5).reverse().forEach(s => {
-
-            recent.innerHTML += `
-            <div class="recent-item">
-
-                <div style="display:flex;gap:12px;align-items:center;">
-
-                    <div class="avatar">
-                        ${s.name.charAt(0)}
-                    </div>
-
-                    <div>
-
-                        <b>${s.name}</b><br>
-                        <small>${s.branch}</small>
-
-                    </div>
-
-                </div>
-
-                <span>#${s.roll}</span>
-
-            </div>
-            `;
-
-        });
-
-    }
-
-    const stats = document.getElementById("branchStats");
-
-    if (stats) {
-
-        stats.innerHTML = "";
-
-        branches.forEach(b => {
-
-            const count = students.filter(x => x.branch === b).length;
-
-            stats.innerHTML += `
-            <div class="branch-box">
-
-                <div>${b}</div>
-
-                <h3>${count}</h3>
-
-            </div>
-            `;
-
-        });
-
-    }
+[...new Set(students.map(s=>s.branch))].forEach(b=>{
+box.innerHTML+=`<button class="branchBtn" onclick="filterBranch('${b}')">${b}</button>`;
+});
 
 }
 
-// ---------- Branch Filter ----------
+document.getElementById("branchCard")?.addEventListener("click",()=>{
+loadBranches();
+openPage("branchPanel");
+});
 
-function loadBranches() {
+function filterBranch(branch){
+loadTable(students.filter(s=>s.branch===branch));
+openPage("view",document.querySelector('[data-page="view"]'));
+}
 
-    const container = document.getElementById("branchButtons");
+function showAllStudents(){
+loadTable();
+openPage("view",document.querySelector('[data-page="view"]'));
+}
 
-    if (!container) return;
+// ===================== EDIT =====================
+function editStudent(i){
 
-    container.innerHTML = "";
+const s=students[i];
 
-    const branches = [...new Set(students.map(s => s.branch))];
+roll.value=s.roll;
+name.value=s.name;
+age.value=s.age;
+gender.value=s.gender;
+branch.value=s.branch;
+contact.value=s.contact;
 
-    container.innerHTML += `
-    <button class="branchBtn"
-    onclick="showAllStudents()">
+students.splice(i,1);
 
-    All Students
+localStorage.setItem("students",JSON.stringify(students));
+loadTable();
 
-    </button>
-    `;
-
-    branches.forEach(branch => {
-
-        container.innerHTML += `
-        <button class="branchBtn"
-        onclick="filterBranch('${branch}')">
-
-        ${branch}
-
-        </button>
-        `;
-
-    });
+openPage("add",document.querySelector('[data-page="add"]'));
 
 }
 
-const branchCard = document.getElementById("branchCard");
+// ===================== DELETE =====================
+function removeStudent(i){
 
-if (branchCard) {
+if(!confirm("Delete this student?")) return;
 
-    branchCard.onclick = () => {
+students.splice(i,1);
 
-        loadBranches();
-
-        openPage("branchPanel");
-
-    };
-
-}
-
-function filterBranch(branch) {
-
-    const filtered = students.filter(s => s.branch === branch);
-
-    loadTable(filtered);
-
-    openPage("view", document.querySelector('[data-page="view"]'));
-
-}
-
-function showAllStudents() {
-
-    loadTable();
-
-    openPage("view", document.querySelector('[data-page="view"]'));
-
-}
-
-// ---------- Edit ----------
-
-function editStudent(index) {
-
-    const s = students[index];
-
-    document.getElementById("roll").value = s.roll;
-    document.getElementById("name").value = s.name;
-    document.getElementById("age").value = s.age;
-    document.getElementById("gender").value = s.gender;
-    document.getElementById("branch").value = s.branch;
-    document.getElementById("contact").value = s.contact;
-
-    students.splice(index, 1);
-
-    localStorage.setItem("students", JSON.stringify(students));
-
-    loadTable();
-
-    openPage("add", document.querySelector('[data-page="add"]'));
-
-}
-
-// ---------- Delete ----------
-
-function removeStudent(index) {
-
-    if (!confirm("Delete this student?")) return;
-
-    students.splice(index, 1);
-
-    localStorage.setItem("students", JSON.stringify(students));
-
-    loadTable();
-
-    loadBranches();
-
-}
-
-// ---------- Search ----------
-
-function searchStudent() {
-
-    const key = document.getElementById("searchBox").value.trim().toLowerCase();
-
-    const student = students.find(s =>
-        s.roll.toLowerCase() === key ||
-        s.name.toLowerCase().includes(key)
-    );
-
-    const result = document.getElementById("searchResult");
-
-    if (student) {
-
-        result.innerHTML = `
-        <div class="panel">
-
-            <h3>${student.name}</h3>
-
-            <p><b>Roll:</b> ${student.roll}</p>
-            <p><b>Age:</b> ${student.age}</p>
-            <p><b>Gender:</b> ${student.gender}</p>
-            <p><b>Branch:</b> ${student.branch}</p>
-            <p><b>Total:</b> ${student.total ?? "-"}</p>
-            <p><b>Percentage:</b> ${student.percentage ?? "-"}${student.percentage ? "%" : ""}</p>
-            <p><b>Grade:</b> ${student.grade ?? "-"}</p>
-
-        </div>
-        `;
-
-    } else {
-
-        result.innerHTML = "<p style='color:red'>Student Not Found</p>";
-
-    }
-
-}
-
-// ---------- Update ----------
-
-function loadStudentForUpdate() {
-
-    const rollNo = document.getElementById("updateRoll").value.trim();
-
-    const student = students.find(s => s.roll === rollNo);
-
-    const area = document.getElementById("updateArea");
-
-    if (!student) {
-
-        area.innerHTML = "<p style='color:red'>Student Not Found</p>";
-
-        return;
-
-    }
-
-    area.innerHTML = `
-    <div class="grid">
-
-        <input id="uName" value="${student.name}">
-        <input id="uAge" value="${student.age}">
-
-        <select id="uGender">
-
-            <option ${student.gender === "Male" ? "selected" : ""}>Male</option>
-            <option ${student.gender === "Female" ? "selected" : ""}>Female</option>
-            <option ${student.gender === "Other" ? "selected" : ""}>Other</option>
-
-        </select>
-
-        <input id="uBranch" value="${student.branch}">
-        <input id="uContact" value="${student.contact}">
-
-    </div>
-
-    <br>
-
-    <button class="primary"
-    onclick="saveUpdate('${rollNo}')">
-
-    Save Changes
-
-    </button>
-    `;
-
-}
-
-function saveUpdate(rollNo) {
-
-    const student = students.find(s => s.roll === rollNo);
-
-    student.name = document.getElementById("uName").value;
-    student.age = document.getElementById("uAge").value;
-    student.gender = document.getElementById("uGender").value;
-    student.branch = document.getElementById("uBranch").value;
-    student.contact = document.getElementById("uContact").value;
-
-    localStorage.setItem("students", JSON.stringify(students));
-
-    loadTable();
-
-    alert("Student Updated Successfully!");
-
-}
-
-// ---------- Delete by Roll ----------
-
-function deleteByRoll() {
-
-    const rollNo = document.getElementById("deleteRoll").value.trim();
-
-    students = students.filter(s => s.roll !== rollNo);
-
-    localStorage.setItem("students", JSON.stringify(students));
-
-    loadTable();
-
-    loadBranches();
-
-    document.getElementById("deleteRoll").value = "";
-
-    alert("Student Deleted!");
-
-}
-
-// ---------- Live Search ----------
-
-const searchInput = document.getElementById("searchInput");
-
-if (searchInput) {
-
-    searchInput.onkeyup = function () {
-
-        const key = this.value.toLowerCase();
-
-        document.querySelectorAll("#tableBody tr").forEach(row => {
-
-            row.style.display = row.innerText.toLowerCase().includes(key) ? "" : "none";
-
-        });
-
-    };
-
-}
-
-// ---------- Logout ----------
-
-const logout = document.querySelector(".logout");
-
-if (logout) {
-
-    logout.onclick = () => {
-
-        if (confirm("Logout?")) {
-
-            location.reload();
-
-        }
-
-    };
-
-}
-
-// ---------- Initial ----------
+localStorage.setItem("students",JSON.stringify(students));
 
 loadTable();
 loadBranches();
-openPage("dashboard", document.querySelector('[data-page="dashboard"]'));
+
+}
+
+// ===================== SEARCH =====================
+function searchStudent(){
+
+const key=searchBox.value.trim().toLowerCase();
+
+const s=students.find(x=>
+x.roll.toLowerCase()===key||
+x.name.toLowerCase().includes(key));
+
+searchResult.innerHTML=s?`
+<div class="panel">
+<h3>${s.name}</h3>
+<p><b>Roll:</b> ${s.roll}</p>
+<p><b>Age:</b> ${s.age}</p>
+<p><b>Gender:</b> ${s.gender}</p>
+<p><b>Branch:</b> ${s.branch}</p>
+<p><b>Total:</b> ${s.total??"-"}</p>
+<p><b>Percentage:</b> ${s.percentage??"-"}${s.percentage?"%":""}</p>
+<p><b>Grade:</b> ${s.grade??"-"}</p>
+</div>`:
+"<p style='color:red'>Student Not Found</p>";
+
+}
+
+// ===================== UPDATE =====================
+function loadStudentForUpdate(){
+
+const rollNo=updateRoll.value.trim();
+
+const s=students.find(x=>x.roll===rollNo);
+
+if(!s){
+updateArea.innerHTML="<p style='color:red'>Student Not Found</p>";
+return;
+}
+
+updateArea.innerHTML=`
+<div class="grid">
+<input id="uName" value="${s.name}">
+<input id="uAge" value="${s.age}">
+<select id="uGender">
+<option ${s.gender==="Male"?"selected":""}>Male</option>
+<option ${s.gender==="Female"?"selected":""}>Female</option>
+<option ${s.gender==="Other"?"selected":""}>Other</option>
+</select>
+<input id="uBranch" value="${s.branch}">
+<input id="uContact" value="${s.contact}">
+</div>
+<br>
+<button class="primary" onclick="saveUpdate('${rollNo}')">Save Changes</button>`;
+
+}
+
+function saveUpdate(rollNo){
+
+const s=students.find(x=>x.roll===rollNo);
+
+s.name=uName.value;
+s.age=uAge.value;
+s.gender=uGender.value;
+s.branch=uBranch.value;
+s.contact=uContact.value;
+
+localStorage.setItem("students",JSON.stringify(students));
+
+loadTable();
+
+alert("Student Updated Successfully!");
+
+}
+
+// ===================== DELETE BY ROLL =====================
+function deleteByRoll(){
+
+const rollNo=deleteRoll.value.trim();
+
+students=students.filter(s=>s.roll!==rollNo);
+
+localStorage.setItem("students",JSON.stringify(students));
+
+loadTable();
+loadBranches();
+
+deleteRoll.value="";
+
+alert("Student Deleted!");
+
+}
+
+// ===================== LIVE SEARCH =====================
+document.getElementById("searchInput")?.addEventListener("keyup",function(){
+
+const key=this.value.toLowerCase();
+
+document.querySelectorAll("#tableBody tr").forEach(r=>{
+r.style.display=r.innerText.toLowerCase().includes(key)?"":"none";
+});
+
+});
+
+// ===================== LOGOUT =====================
+document.querySelector(".logout")?.addEventListener("click",()=>{
+if(confirm("Logout?"))
+openPage("dashboard",document.querySelector('[data-page="dashboard"]'));
+});
+
+// ===================== START =====================
+loadTable();
+loadBranches();
+openPage("dashboard",document.querySelector('[data-page="dashboard"]'));
