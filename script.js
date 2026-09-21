@@ -359,7 +359,7 @@ document.getElementById("branchCard").onclick=function(){
 };
 
 // ---------- Logout ----------
-logout.onclick=function(){
+document.querySelector(".logout").onclick = function() {{
   if(confirm("Logout?")){
     openPage("dashboard",document.querySelector('[data-page="dashboard"]'));
   }
