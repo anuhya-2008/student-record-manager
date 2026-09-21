@@ -72,10 +72,12 @@ function updateDashboard() {
   students.slice(-5).reverse().forEach(s => {
     recent.innerHTML += `
       <div class="recent-item">
-        <div class="avatar">${s.name.charAt(0)}</div>
-        <div>
-          <b>${s.name}</b><br>
-          <small>${s.branch}</small>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="avatar">${s.name.charAt(0)}</div>
+          <div>
+            <b>${s.name}</b><br>
+            <small>${s.branch}</small>
+          </div>
         </div>
       </div>`;
   });
@@ -95,6 +97,8 @@ function updateDashboard() {
 // ---------- View Table ----------
 function loadTable(list = students) {
   const body = document.getElementById("tableBody");
+  if(!body) return;
+
   body.innerHTML = "";
 
   list.forEach((s,index)=>{
@@ -121,6 +125,7 @@ function loadTable(list = students) {
 // ---------- Add Student ----------
 const form = document.getElementById("studentForm");
 
+if(form){
 form.addEventListener("submit", function(e){
   e.preventDefault();
 
@@ -149,6 +154,7 @@ form.addEventListener("submit", function(e){
   alert("Student Added Successfully!");
   openPage("view",document.querySelector('[data-page="view"]'));
 });
+}
 
 // ---------- Grade ----------
 function grade(p){
@@ -213,8 +219,12 @@ function searchStudent(){
       <div class="panel">
         <h3>${s.name}</h3>
         <p><b>Roll:</b> ${s.roll}</p>
+        <p><b>Age:</b> ${s.age}</p>
+        <p><b>Gender:</b> ${s.gender}</p>
         <p><b>Branch:</b> ${s.branch}</p>
+        <p><b>Total:</b> ${s.total || "-"}</p>
         <p><b>Percentage:</b> ${s.percentage || "-"}</p>
+        <p><b>Grade:</b> ${s.grade || "-"}</p>
       </div>`;
   }else{
     searchResult.innerHTML="<p style='color:red'>Student Not Found</p>";
@@ -311,6 +321,9 @@ function deleteByRoll(){
 }
 
 // ---------- Live Search ----------
+const searchInput = document.getElementById("searchInput");
+
+if(searchInput){
 searchInput.onkeyup=function(){
   const key=this.value.toLowerCase();
 
@@ -322,9 +335,14 @@ searchInput.onkeyup=function(){
     )
   );
 };
+}
 
 // ---------- Branch Section ----------
+const branchButtons=document.getElementById("branchButtons");
+
 function loadBranches(){
+  if(!branchButtons) return;
+
   branchButtons.innerHTML="";
 
   const branches=[...new Set(students.map(s=>s.branch))];
@@ -353,17 +371,25 @@ function showAllStudents(){
 }
 
 // Branch Card Click
-document.getElementById("branchCard").onclick=function(){
+const branchCard=document.getElementById("branchCard");
+
+if(branchCard){
+branchCard.onclick=function(){
   loadBranches();
   openPage("branchPanel");
 };
+}
 
 // ---------- Logout ----------
-document.querySelector(".logout").onclick = function() {{
+const logoutBtn=document.querySelector(".logout");
+
+if(logoutBtn){
+logoutBtn.onclick=function(){
   if(confirm("Logout?")){
     openPage("dashboard",document.querySelector('[data-page="dashboard"]'));
   }
 };
+}
 
 // ---------- Start ----------
 loadBranches();
