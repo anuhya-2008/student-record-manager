@@ -35,9 +35,9 @@ const sampleStudents = [
 // ---------- Load Data ----------
 let students = JSON.parse(localStorage.getItem("students"));
 
-if (!students) {
-  students = sampleStudents;
-  localStorage.setItem("students", JSON.stringify(students));
+if (!students || students.length === 0) {
+    students = sampleStudents;
+    localStorage.setItem("students", JSON.stringify(students));
 }
 
 // ---------- Navigation ----------
